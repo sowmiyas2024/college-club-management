@@ -1,0 +1,841 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusConnect | Events & Registration</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+:root {
+    --purple: #6025c7;
+    --purple-dark: #241b55;
+    --purple-light: #eee8ff;
+    --page: #f6f4ff;
+    --text: #17284c;
+    --muted: #64748b;
+    --border: #e8e3f6;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+.navbar {
+    background: white;
+    border-bottom: 1px solid var(--border);
+}
+.brand {
+    color: var(--purple);
+    font-size: 24px;
+    font-weight: 800;
+    text-decoration: none;
+}
+.btn-purple {
+    background: var(--purple);
+    border: 1px solid var(--purple);
+    color: white;
+}
+.btn-purple:hover {
+    background: #4b19a6;
+    color: white;
+}
+.btn-outline-purple {
+    border: 1px solid #c8b5ff;
+    color: var(--purple);
+    background: white;
+}
+.btn-outline-purple:hover {
+    background: var(--purple-light);
+    color: var(--purple);
+}
+.hero {
+    padding: 38px;
+    border-radius: 22px;
+    color: white;
+    background: linear-gradient(110deg, #241b55, #6025c7);
+}
+.hero h1 { font-weight: 800; }
+.panel, .event-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 8px 28px rgba(42,28,91,.05);
+}
+.event-card { overflow: hidden; height: 100%; }
+.card-photo {
+    height: 190px;
+    width: 100%;
+    object-fit: cover;
+    background: var(--purple-light);
+}
+.card-content { padding: 20px; }
+.card-content h5 { font-weight: 800; }
+.pill {
+    display: inline-block;
+    background: var(--purple-light);
+    color: var(--purple);
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+.event-detail {
+    display: flex;
+    gap: 9px;
+    margin: 10px 0;
+    color: #526079;
+    font-size: 14px;
+}
+.event-detail i { color: var(--purple); }
+.muted { color: var(--muted); }
+.form-control, .form-select {
+    border-radius: 10px;
+    padding: 11px 12px;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 .2rem rgba(124,58,237,.12);
+}
+.payment-choice {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+}
+.payment-choice:has(input:checked) {
+    border-color: var(--purple);
+    background: #f8f5ff;
+}
+.payment-icon {
+    font-size: 25px;
+    color: var(--purple);
+}
+.hidden { display: none !important; }
+footer { color: var(--muted); font-size: 13px; }
+@media(max-width: 768px) {
+    .hero { padding: 25px; }
+    .card-photo { height: 170px; }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container py-2">
+        <a class="brand" href="/index.html">CampusConnect</a>
+        <div class="ms-auto d-flex gap-2">
+            <a href="/index.html" class="btn btn-outline-purple">
+                <i class="bi bi-house me-1"></i> Dashboard
+            </a>
+            <button id="logoutBtn" class="btn btn-purple">
+                <i class="bi bi-box-arrow-right me-1"></i> Log out
+            </button>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4 py-lg-5">
+
+    <div class="hero mb-4">
+        <div class="small text-uppercase mb-2">Your campus, your community</div>
+        <h1>Discover Campus Events</h1>
+        <p class="mb-0">
+            Explore upcoming events, check the entry fee, and register for activities.
+        </p>
+    </div>
+
+    <div id="pageMessage" class="alert hidden" role="status" aria-live="polite"></div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Upcoming Events</h2>
+            <p class="muted mb-0" id="welcomeMessage">Loading your events...</p>
+        </div>
+        <button id="refreshBtn" class="btn btn-outline-purple">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+        </button>
+    </div>
+
+    <div id="eventsGrid" class="row g-4">
+        <div class="col-12">
+            <div class="panel p-4 text-center muted">Loading events...</div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="text-center py-4">
+    CampusConnect · College Clubs and Events
+</footer>
+
+<!-- Registration and payment form -->
+<div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 rounded-4">
+
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title fw-bold">Complete Event Registration</h5>
+                    <p class="muted small mb-0">Review your event and select a payment method.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+
+                <div class="p-3 rounded-3 mb-4" style="background:#f6f4ff">
+                    <div class="small muted">Selected event</div>
+                    <h5 id="selectedEventTitle" class="fw-bold mt-1 mb-2">Event</h5>
+                    <div id="selectedEventDate" class="small muted mb-1"></div>
+                    <div id="selectedEventLocation" class="small muted mb-2"></div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Entry fee</span>
+                        <strong id="selectedEventFee" class="fs-5">₹0</strong>
+                    </div>
+                </div>
+
+                <form id="paymentForm">
+                    <label class="form-label fw-bold">Choose payment method</label>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="payment-choice d-flex gap-3 align-items-center h-100">
+                                <input type="radio" name="paymentMethod" value="upi" required>
+                                <i class="bi bi-phone payment-icon"></i>
+                                <span>
+                                    <strong class="d-block">UPI</strong>
+                                    <small class="muted">UPI payment details</small>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="payment-choice d-flex gap-3 align-items-center h-100">
+                                <input type="radio" name="paymentMethod" value="card" required>
+                                <i class="bi bi-credit-card payment-icon"></i>
+                                <span>
+                                    <strong class="d-block">Credit / Debit Card</strong>
+                                    <small class="muted">Cardholder information</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- UPI fields -->
+                    <div id="upiFields" class="hidden">
+                        <h6 class="fw-bold mb-3">UPI Information</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="upiId">UPI ID</label>
+                            <input class="form-control" id="upiId"
+                                placeholder="example@upi" autocomplete="off">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="upiReference">
+                                Transaction reference
+                            </label>
+                            <input class="form-control" id="upiReference"
+                                placeholder="Enter a sample reference" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <!-- Card fields -->
+                    <div id="cardFields" class="hidden">
+                        <h6 class="fw-bold mb-3">Card Information</h6>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="cardName">Cardholder name</label>
+                            <input class="form-control" id="cardName"
+                                placeholder="Name on card" autocomplete="off">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="cardNumber">Card number</label>
+                            <input class="form-control" id="cardNumber"
+                                inputmode="numeric" maxlength="23"
+                                placeholder="Enter fictional card details"
+                                autocomplete="off">
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label" for="cardExpiry">Expiry date</label>
+                                <input class="form-control" id="cardExpiry"
+                                    placeholder="MM/YY" maxlength="5" autocomplete="off">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" for="cardCvv">CVV</label>
+                                <input class="form-control" id="cardCvv"
+                                    inputmode="numeric" maxlength="4"
+                                    placeholder="CVV" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info small mt-4 mb-3">
+                        This checkout is for website presentation only. No real payment
+                        will be processed. Use fictional details only. Payment credentials
+                        are not sent to or stored by this website.
+                    </div>
+
+                    <div id="paymentMessage" class="alert hidden" role="status"></div>
+
+                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-purple" id="submitPaymentBtn">
+                            <i class="bi bi-check-circle me-1"></i> Complete Registration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let currentRole = "student";
+let eventsData = [];
+let registeredEventIds = new Set();
+let selectedEvent = null;
+let registrationModal = null;
+
+const fallbackImages = [
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=900&q=85",
+    "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=85"
+];
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+function normaliseId(value) {
+    if (value && typeof value === "object") {
+        return String(value._id || value.id || "");
+    }
+    return value == null ? "" : String(value);
+}
+
+function eventId(event) {
+    return normaliseId(event?._id || event?.id);
+}
+
+function getArray(data, keys = []) {
+    if (Array.isArray(data)) return data;
+
+    for (const key of keys) {
+        if (Array.isArray(data?.[key])) return data[key];
+    }
+
+    return [];
+}
+
+function roleName(user) {
+    return String(user?.role || "student").trim().toLowerCase();
+}
+
+function eventTitle(event) {
+    return event.title || event.name || "Campus Event";
+}
+
+function eventDate(event) {
+    return event.date || event.startDate || event.eventDate || null;
+}
+
+function eventLocation(event) {
+    return event.location || event.venue || event.place || "Venue to be announced";
+}
+
+function feeAmount(event) {
+    const raw = event.fee ?? event.entryFee ?? event.price ??
+        event.registrationFee ?? 0;
+    const amount = Number(raw);
+    return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function formatFee(event) {
+    const amount = feeAmount(event);
+    return amount === 0 ? "Free" : "₹" + amount.toLocaleString("en-IN");
+}
+
+function formatDate(date) {
+    if (!date) return "Date to be announced";
+
+    const parsed = new Date(date);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return String(date);
+    }
+
+    return parsed.toLocaleString([], {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
+function showPageMessage(message, type = "info") {
+    const box = $("pageMessage");
+    box.className = "alert alert-" + type;
+    box.textContent = message;
+    box.classList.remove("hidden");
+}
+
+function hidePageMessage() {
+    $("pageMessage").classList.add("hidden");
+}
+
+function showPaymentMessage(message, type = "info") {
+    const box = $("paymentMessage");
+    box.className = "alert alert-" + type;
+    box.textContent = message;
+    box.classList.remove("hidden");
+}
+
+async function api(url, options = {}) {
+    const headers = {
+        ...(options.headers || {})
+    };
+
+    if (options.body && !(options.body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    const response = await fetch(url, {
+        credentials: "same-origin",
+        ...options,
+        headers
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json().catch(() => ({}))
+        : await response.text().catch(() => "");
+
+    if (response.status === 401) {
+        window.location.replace("/login.html");
+        throw new Error("Your session has expired. Please log in again.");
+    }
+
+    if (!response.ok) {
+        const message = typeof data === "string"
+            ? data
+            : data.message || data.error ||
+              "Request failed (" + response.status + ").";
+
+        throw new Error(message);
+    }
+
+    return data;
+}
+
+/*
+ * Prefer the event's own image. If it has none, select a stable
+ * fallback based on its ID, so different events get different images.
+ */
+function imageForEvent(event, index) {
+    const suppliedImage = event.image || event.imageUrl || event.bannerImage;
+
+    if (suppliedImage) return suppliedImage;
+
+    const id = eventId(event);
+    let hash = 0;
+    const source = id || String(index);
+
+    for (let i = 0; i < source.length; i++) {
+        hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+    }
+
+    return fallbackImages[hash % fallbackImages.length];
+}
+
+async function loadCurrentUser() {
+    const result = await api("/api/auth/me");
+    currentUser = result.user || result;
+    currentRole = roleName(currentUser);
+
+    $("welcomeMessage").textContent =
+        "Welcome, " + (currentUser.name || currentUser.fullName ||
+        currentUser.email || "Student") + ". Select an event to register.";
+}
+
+async function loadEvents() {
+    const result = await api("/api/events");
+    eventsData = getArray(result, ["events", "data", "results"]);
+
+    registeredEventIds = new Set();
+
+    if (currentRole === "student") {
+        try {
+            const result = await api("/api/events/registrations/my");
+            const registrations = getArray(result, [
+                "registrations", "events", "data", "results"
+            ]);
+
+            registrations.forEach(item => {
+                const id = normaliseId(
+                    item.event?._id ||
+                    item.event ||
+                    item.eventId
+                );
+
+                if (id) registeredEventIds.add(id);
+            });
+        } catch (error) {
+            console.warn("Could not load registrations:", error.message);
+        }
+    }
+
+    renderEvents();
+}
+
+function renderEvents() {
+    const grid = $("eventsGrid");
+
+    if (!eventsData.length) {
+        grid.innerHTML =
+            '<div class="col-12"><div class="panel p-4 text-center">' +
+            '<i class="bi bi-calendar-event fs-2 d-block mb-2"></i>' +
+            'No events are available yet.</div></div>';
+        return;
+    }
+
+    grid.innerHTML = eventsData.map((event, index) => {
+        const id = eventId(event);
+        const title = eventTitle(event);
+        const description = event.description ||
+            "Join this campus activity and take part.";
+        const registered = registeredEventIds.has(id);
+        const image = imageForEvent(event, index);
+
+        let action = "";
+
+        if (currentRole === "student") {
+            action = registered
+                ? '<button class="btn btn-outline-success w-100" disabled>' +
+                  '<i class="bi bi-check-circle-fill me-1"></i> Registered</button>'
+                : '<button class="btn btn-purple w-100" data-action="register" ' +
+                  'data-id="' + escapeHtml(id) + '">' +
+                  '<i class="bi bi-ticket-perforated me-1"></i> Register for Event</button>';
+        } else {
+            action = '<a href="/attendance.html" class="btn btn-outline-purple w-100">' +
+                'Manage Attendance</a>';
+        }
+
+        return `
+            <div class="col-md-6 col-xl-4">
+                <article class="event-card">
+                    <img class="card-photo"
+                         src="${escapeHtml(image)}"
+                         alt="${escapeHtml(title)}"
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='${fallbackImages[index % fallbackImages.length]}'">
+
+                    <div class="card-content">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <span class="pill">${escapeHtml(event.category || event.club?.name || "Campus Event")}</span>
+                            <span class="pill">${escapeHtml(formatFee(event))}</span>
+                        </div>
+
+                        <h5 class="mt-3 mb-2">${escapeHtml(title)}</h5>
+                        <p class="muted small">${escapeHtml(description)}</p>
+
+                        <div class="event-detail">
+                            <i class="bi bi-calendar3"></i>
+                            <span>${escapeHtml(formatDate(eventDate(event)))}</span>
+                        </div>
+
+                        <div class="event-detail">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>${escapeHtml(eventLocation(event))}</span>
+                        </div>
+
+                        <div class="mt-3">${action}</div>
+                    </div>
+                </article>
+            </div>
+        `;
+    }).join("");
+}
+
+function openRegistration(event) {
+    selectedEvent = event;
+
+    $("selectedEventTitle").textContent = eventTitle(event);
+    $("selectedEventDate").textContent = formatDate(eventDate(event));
+    $("selectedEventLocation").textContent = eventLocation(event);
+    $("selectedEventFee").textContent = formatFee(event);
+
+    $("paymentForm").reset();
+    $("upiFields").classList.add("hidden");
+    $("cardFields").classList.add("hidden");
+    $("paymentMessage").classList.add("hidden");
+
+    $("submitPaymentBtn").disabled = false;
+    $("submitPaymentBtn").innerHTML =
+        '<i class="bi bi-check-circle me-1"></i> Complete Registration';
+
+    registrationModal.show();
+}
+
+document.querySelectorAll('input[name="paymentMethod"]').forEach(input => {
+    input.addEventListener("change", () => {
+        const method = document.querySelector(
+            'input[name="paymentMethod"]:checked'
+        )?.value;
+
+        $("upiFields").classList.toggle("hidden", method !== "upi");
+        $("cardFields").classList.toggle("hidden", method !== "card");
+
+        $("upiId").required = method === "upi";
+        $("upiReference").required = method === "upi";
+
+        $("cardName").required = method === "card";
+        $("cardNumber").required = method === "card";
+        $("cardExpiry").required = method === "card";
+        $("cardCvv").required = method === "card";
+    });
+});
+
+/*
+ * These fields are checked only in the browser for the presentation.
+ * Their values are NEVER sent to the server or stored.
+ */
+function validatePresentationFields(method) {
+    if (method === "upi") {
+        if (!$("upiId").value.trim() || !$("upiReference").value.trim()) {
+            showPaymentMessage(
+                "Please complete the UPI information using fictional details.",
+                "warning"
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    if (method === "card") {
+        if (
+            !$("cardName").value.trim() ||
+            !$("cardNumber").value.trim() ||
+            !$("cardExpiry").value.trim() ||
+            !$("cardCvv").value.trim()
+        ) {
+            showPaymentMessage(
+                "Please complete the card form using fictional details.",
+                "warning"
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    showPaymentMessage("Please select a payment method.", "warning");
+    return false;
+}
+
+document.addEventListener("click", async event => {
+    const button = event.target.closest('[data-action="register"]');
+    if (!button) return;
+
+    if (currentRole !== "student") {
+        showPageMessage("Only students can register for events.", "warning");
+        return;
+    }
+
+    const id = button.dataset.id;
+    const selected = eventsData.find(item => eventId(item) === id);
+
+    if (!selected) {
+        showPageMessage("Event not found. Please refresh the page.", "danger");
+        return;
+    }
+
+    button.disabled = true;
+
+    try {
+        const status = await api(
+            "/api/events/" + encodeURIComponent(id) + "/registration"
+        );
+
+        if (status.registered) {
+            registeredEventIds.add(id);
+            renderEvents();
+            showPageMessage("You are already registered for this event.", "info");
+            return;
+        }
+
+        openRegistration(selected);
+    } catch (error) {
+        showPageMessage(error.message || "Could not check registration status.", "danger");
+    } finally {
+        if (button.isConnected) button.disabled = false;
+    }
+});
+
+$("paymentForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!selectedEvent) return;
+
+    const selected = selectedEvent;
+    const id = eventId(selected);
+    const method = document.querySelector(
+        'input[name="paymentMethod"]:checked'
+    )?.value;
+
+    if (!validatePresentationFields(method)) return;
+
+    const button = $("submitPaymentBtn");
+    button.disabled = true;
+    button.textContent = "Completing registration...";
+
+    try {
+        /*
+         * Only the payment method is sent.
+         * No card number, CVV, UPI ID, expiry date or reference is sent.
+         * The existing backend records the registration.
+         */
+        await api("/api/events/" + encodeURIComponent(id) + "/pay", {
+            method: "POST",
+            body: JSON.stringify({
+                paymentMethod: feeAmount(selected) > 0 ? method : "free"
+            })
+        });
+
+        registeredEventIds.add(id);
+        renderEvents();
+
+        showPaymentMessage(
+            "Registration successful! You are registered for " +
+            eventTitle(selected) + ".",
+            "success"
+        );
+
+        button.textContent = "Registration Successful";
+
+        try {
+            await loadEvents();
+        } catch (error) {
+            console.warn("Could not refresh events:", error.message);
+        }
+
+        setTimeout(() => {
+            registrationModal.hide();
+            showPageMessage(
+                "You are registered for " + eventTitle(selected) + ".",
+                "success"
+            );
+        }, 1300);
+
+    } catch (error) {
+        showPaymentMessage(
+            error.message || "Registration could not be completed.",
+            "danger"
+        );
+
+        button.disabled = false;
+        button.innerHTML =
+            '<i class="bi bi-check-circle me-1"></i> Complete Registration';
+    }
+});
+
+$("refreshBtn").addEventListener("click", async () => {
+    $("refreshBtn").disabled = true;
+    hidePageMessage();
+
+    try {
+        await loadEvents();
+        showPageMessage("Events refreshed.", "success");
+    } catch (error) {
+        showPageMessage(error.message || "Could not refresh events.", "danger");
+    } finally {
+        $("refreshBtn").disabled = false;
+    }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+    $("logoutBtn").disabled = true;
+
+    try {
+        await api("/api/auth/logout", {
+            method: "POST",
+            body: JSON.stringify({})
+        });
+    } catch (error) {
+        console.warn("Logout:", error.message);
+    } finally {
+        window.location.replace("/login.html");
+    }
+});
+
+async function init() {
+    registrationModal = new bootstrap.Modal($("registrationModal"));
+
+    try {
+        await loadCurrentUser();
+        await loadEvents();
+
+        // If the dashboard passed an event ID, open that event's form.
+        const params = new URLSearchParams(window.location.search);
+        const requestedEventId = params.get("eventId");
+
+        if (requestedEventId && currentRole === "student") {
+            const requestedEvent = eventsData.find(
+                item => eventId(item) === requestedEventId
+            );
+
+            if (requestedEvent) {
+                if (registeredEventIds.has(requestedEventId)) {
+                    showPageMessage(
+                        "You are already registered for this event.",
+                        "info"
+                    );
+                } else {
+                    openRegistration(requestedEvent);
+                }
+            } else {
+                showPageMessage(
+                    "The selected event could not be found. Please select it below.",
+                    "warning"
+                );
+            }
+        }
+    } catch (error) {
+        showPageMessage(
+            error.message || "Could not load events. Please log in again.",
+            "danger"
+        );
+    }
+}
+
+init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Event Attendance | CampusConnect</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            --primary: #6d28d9;
+            --primary-dark: #4c1d95;
+            --navy: #172554;
+            --background: #f5f3ff;
+            --muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: #1e293b;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, .97);
+            border-bottom: 1px solid #e9e5f5;
+        }
+
+        .brand {
+            color: var(--primary-dark);
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .brand:hover {
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: #c4b5fd;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            border-radius: 22px;
+            padding: 35px;
+            color: white;
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(23, 37, 84, .96),
+                    rgba(76, 29, 149, .78)
+                ),
+                url("https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1600&q=85")
+                center 45% / cover;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            max-width: 650px;
+            color: #ede9fe;
+            line-height: 1.7;
+        }
+
+        .eyebrow {
+            color: #ddd6fe;
+            font-size: .78rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-card {
+            height: 100%;
+            padding: 24px;
+            background: white;
+            border: 1px solid #eee9fb;
+            border-radius: 18px;
+            box-shadow: 0 6px 24px rgba(50, 30, 90, .05);
+        }
+
+        .section-title {
+            color: var(--navy);
+            font-weight: 800;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .info-icon {
+            width: 43px;
+            height: 43px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 13px;
+            background: #ede9fe;
+            color: var(--primary-dark);
+            font-size: 1.25rem;
+        }
+
+        .attendance-card {
+            overflow: hidden;
+            background: white;
+            border: 1px solid #eee9fb;
+            border-radius: 18px;
+            box-shadow: 0 6px 24px rgba(50, 30, 90, .05);
+        }
+
+        .attendance-status {
+            min-width: 130px;
+        }
+
+        .table thead th {
+            padding: 15px 12px;
+            background: #f8f7ff;
+            color: #475569;
+            font-size: .82rem;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            padding: 14px 12px;
+        }
+
+        .form-select:focus,
+        .form-control:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 .2rem rgba(109, 40, 217, .12);
+        }
+
+        .support-link {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+        .support-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding: 25px 0;
+            background: white;
+            border-top: 1px solid #e9e5f5;
+            color: var(--muted);
+        }
+
+        @media (max-width: 576px) {
+            .hero {
+                min-height: 220px;
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .section-card {
+                padding: 19px;
+            }
+
+            .hero h1 {
+                letter-spacing: -.5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container py-2">
+        <a class="navbar-brand brand" href="/index.html">
+            CampusConnect
+        </a>
+
+        <a class="btn btn-outline-primary btn-sm" href="/index.html">
+            ← Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<main class="container py-4 py-lg-5">
+
+    <section class="hero mb-4">
+        <div>
+            <div class="eyebrow mb-3">CampusConnect · Event Management</div>
+            <h1>Event Attendance</h1>
+            <p class="mb-0">
+                Keep event records organised, track student participation,
+                and help every campus activity run smoothly.
+            </p>
+        </div>
+    </section>
+
+    <div
+        id="message"
+        class="alert alert-info"
+        role="status"
+        aria-live="polite"
+    >
+        Loading events...
+    </div>
+
+    <section class="attendance-card p-3 p-md-4 mb-4">
+        <div class="row align-items-end g-3">
+            <div class="col-12 col-lg-8">
+                <label for="eventSelect" class="form-label fw-bold">
+                    Select an event
+                </label>
+
+                <select id="eventSelect" class="form-select">
+                    <option value="">Loading events...</option>
+                </select>
+
+                <small class="muted d-block mt-2">
+                    Choose an event to view its registered students
+                    and saved attendance records.
+                </small>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <button
+                    id="saveAllBtn"
+                    class="btn btn-primary w-100"
+                    disabled
+                >
+                    Save Attendance
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section class="attendance-card mb-4">
+        <div class="p-3 p-md-4 border-bottom">
+            <h5 class="section-title mb-1">Student Attendance</h5>
+            <p class="muted mb-0">
+                Mark each registered student as present or absent.
+            </p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Email</th>
+                        <th style="min-width: 150px;">Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentsBody">
+                    <tr>
+                        <td colspan="3" class="text-center text-secondary py-4">
+                            Choose an event to load students.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="p-3 border-top">
+            <small class="muted">
+                Remember to save your changes before leaving this page.
+            </small>
+        </div>
+    </section>
+
+    <section class="row g-4 mb-4" id="about">
+        <div class="col-12 col-lg-6">
+            <div class="section-card">
+                <div class="d-flex gap-3 align-items-start">
+                    <div class="info-icon" aria-hidden="true">⌂</div>
+
+                    <div>
+                        <h5 class="section-title">About CampusConnect</h5>
+                        <p class="muted mb-3">
+                            CampusConnect brings college clubs, events,
+                            and student activities together in one place.
+                            Students can discover clubs, request membership,
+                            explore events, and manage their registrations.
+                        </p>
+                        <p class="muted mb-0">
+                            Coordinators and administrators can manage
+                            club information, review membership requests,
+                            organise events, and record attendance according
+                            to their account permissions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6" id="support">
+            <div class="section-card">
+                <div class="d-flex gap-3 align-items-start">
+                    <div class="info-icon" aria-hidden="true">✉</div>
+
+                    <div>
+                        <h5 class="section-title">Help &amp; Support</h5>
+                        <p class="muted">
+                            Having trouble logging in, accessing your account,
+                            joining a club, or registering for an event?
+                            Contact the CampusConnect administrator.
+                        </p>
+
+                        <p class="mb-2">
+                            <strong>Administrator support email</strong>
+                        </p>
+
+                        <a
+                            class="support-link"
+                            href="mailto:skss0722@gmail.com?subject=CampusConnect%20Support"
+                        >
+                            skss0722@gmail.com
+                        </a>
+
+                        <p class="muted small mt-3 mb-0">
+                            When asking for help, describe the issue and
+                            include the email associated with your account.
+                            Never send your password.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-card">
+        <h5 class="section-title">Attendance guidelines</h5>
+
+        <div class="row g-3 mt-1">
+            <div class="col-12 col-md-4">
+                <div class="d-flex gap-3">
+                    <div class="info-icon" aria-hidden="true">1</div>
+                    <div>
+                        <strong>Select an event</strong>
+                        <p class="muted small mb-0">
+                            Choose the event from the list above.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="d-flex gap-3">
+                    <div class="info-icon" aria-hidden="true">2</div>
+                    <div>
+                        <strong>Review attendance</strong>
+                        <p class="muted small mb-0">
+                            Check the registered students and mark
+                            their attendance accurately.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="d-flex gap-3">
+                    <div class="info-icon" aria-hidden="true">3</div>
+                    <div>
+                        <strong>Save your changes</strong>
+                        <p class="muted small mb-0">
+                            Save the records and wait for the confirmation
+                            message before leaving.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="container d-flex flex-column flex-md-row
+                justify-content-between gap-2">
+        <span class="fw-bold">CampusConnect</span>
+        <span>Clubs, events, and campus community.</span>
+        <a class="support-link" href="#support">Contact Support</a>
+    </div>
+</footer>
+
+<script>
+const message = document.getElementById("message");
+const eventSelect = document.getElementById("eventSelect");
+const studentsBody = document.getElementById("studentsBody");
+const saveAllBtn = document.getElementById("saveAllBtn");
+
+let currentStudents = [];
+let savedStatuses = {};
+
+async function api(url, options = {}) {
+    const response = await fetch(url, {
+        credentials: "same-origin",
+        ...options
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401) {
+        window.location.replace("/login.html");
+        throw new Error("Please log in again.");
+    }
+
+    if (!response.ok) {
+        throw new Error(data.message || "Request failed.");
+    }
+
+    return data;
+}
+
+function showMessage(text, type = "info") {
+    message.className = "alert alert-" + type;
+    message.textContent = text;
+}
+
+function showTableMessage(text) {
+    studentsBody.replaceChildren();
+
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+
+    cell.colSpan = 3;
+    cell.className = "text-center text-secondary py-4";
+    cell.textContent = text;
+
+    row.appendChild(cell);
+    studentsBody.appendChild(row);
+}
+
+function getArray(data, possibleKeys = []) {
+    if (Array.isArray(data)) return data;
+
+    for (const key of possibleKeys) {
+        if (Array.isArray(data?.[key])) return data[key];
+    }
+
+    return [];
+}
+
+async function loadEvents() {
+    eventSelect.disabled = true;
+    saveAllBtn.disabled = true;
+
+    try {
+        const [eventsResponse, userResponse] = await Promise.all([
+            api("/api/events"),
+            api("/api/auth/me")
+        ]);
+
+        const user = userResponse.user || userResponse;
+        const role = String(user.role || "").trim().toLowerCase();
+
+        if (!["admin", "coordinator"].includes(role)) {
+            showMessage(
+                "Only coordinators and administrators can manage attendance.",
+                "danger"
+            );
+            eventSelect.disabled = true;
+            return;
+        }
+
+        const events = getArray(eventsResponse, ["events", "data"]);
+
+        eventSelect.replaceChildren();
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select an event";
+        eventSelect.appendChild(placeholder);
+
+        events.forEach(event => {
+            const option = document.createElement("option");
+            option.value = event._id;
+
+            const dateText = event.date
+                ? new Date(event.date).toLocaleString()
+                : "Date not available";
+
+            option.textContent =
+                (event.title || "Untitled event") + " — " + dateText;
+
+            eventSelect.appendChild(option);
+        });
+
+        eventSelect.disabled = false;
+
+        showMessage(
+            events.length
+                ? "Choose an event to load its registered students."
+                : "No events were found.",
+            events.length ? "info" : "warning"
+        );
+    } catch (error) {
+        showMessage(error.message, "danger");
+        eventSelect.disabled = true;
+    }
+}
+
+async function loadAttendance() {
+    const eventId = eventSelect.value;
+
+    currentStudents = [];
+    savedStatuses = {};
+    saveAllBtn.disabled = true;
+
+    if (!eventId) {
+        showTableMessage("Choose an event to load students.");
+        showMessage("Select an event.", "info");
+        return;
+    }
+
+    eventSelect.disabled = true;
+    showTableMessage("Loading registered students...");
+
+    try {
+        showMessage(
+            "Loading registered students and saved attendance...",
+            "info"
+        );
+
+        const [studentsResponse, recordsResponse] = await Promise.all([
+            api(
+                "/api/events/" +
+                encodeURIComponent(eventId) +
+                "/attendance/students"
+            ),
+            api(
+                "/api/events/" +
+                encodeURIComponent(eventId) +
+                "/attendance"
+            )
+        ]);
+
+        const students = getArray(
+            studentsResponse,
+            ["students", "data"]
+        );
+
+        const records = getArray(
+            recordsResponse,
+            ["attendance", "records", "data"]
+        );
+
+        currentStudents = students;
+
+        records.forEach(record => {
+            const studentId =
+                record.student && record.student._id
+                    ? record.student._id
+                    : record.student;
+
+            if (studentId) {
+                savedStatuses[String(studentId)] =
+                    String(record.status || "").toLowerCase();
+            }
+        });
+
+        if (students.length === 0) {
+            showTableMessage(
+                "No registered students were found for this event."
+            );
+
+            showMessage(
+                "No registered students were found for this event.",
+                "warning"
+            );
+            return;
+        }
+
+        studentsBody.replaceChildren();
+
+        students.forEach(student => {
+            const row = document.createElement("tr");
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = student.name || "Unnamed student";
+
+            const emailCell = document.createElement("td");
+            emailCell.textContent = student.email || "No email available";
+
+            const statusCell = document.createElement("td");
+            const select = document.createElement("select");
+
+            select.className = "form-select attendance-status";
+            select.dataset.studentId = student._id;
+            select.setAttribute(
+                "aria-label",
+                "Attendance status for " + (student.name || "student")
+            );
+
+            [
+                { value: "present", label: "Present" },
+                { value: "absent", label: "Absent" }
+            ].forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.textContent = item.label;
+                select.appendChild(option);
+            });
+
+            const previousStatus =
+                savedStatuses[String(student._id)];
+
+            select.value =
+                ["present", "absent"].includes(previousStatus)
+                    ? previousStatus
+                    : "absent";
+
+            statusCell.appendChild(select);
+            row.append(nameCell, emailCell, statusCell);
+            studentsBody.appendChild(row);
+        });
+
+        saveAllBtn.disabled = false;
+
+        showMessage(
+            students.length +
+            " registered student(s) loaded. Review statuses and save.",
+            "success"
+        );
+    } catch (error) {
+        showTableMessage("Could not load students. Please try again.");
+        showMessage(error.message, "danger");
+    } finally {
+        eventSelect.disabled = false;
+    }
+}
+
+eventSelect.addEventListener("change", loadAttendance);
+
+saveAllBtn.addEventListener("click", async () => {
+    const eventId = eventSelect.value;
+
+    if (!eventId || currentStudents.length === 0) return;
+
+    const selectors = [
+        ...studentsBody.querySelectorAll(".attendance-status")
+    ];
+
+    saveAllBtn.disabled = true;
+    eventSelect.disabled = true;
+
+    showMessage("Saving attendance...", "info");
+
+    let savedCount = 0;
+
+    try {
+        for (const select of selectors) {
+            await api(
+                "/api/events/" +
+                encodeURIComponent(eventId) +
+                "/attendance/" +
+                encodeURIComponent(select.dataset.studentId),
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        status: select.value
+                    })
+                }
+            );
+
+            savedCount++;
+        }
+
+        selectors.forEach(select => {
+            savedStatuses[select.dataset.studentId] = select.value;
+        });
+
+        showMessage(
+            "Attendance saved successfully for " +
+            savedCount + " student(s).",
+            "success"
+        );
+    } catch (error) {
+        showMessage(
+            error.message +
+            " " + savedCount +
+            " record(s) were saved before the error. Check the records and retry.",
+            "danger"
+        );
+    } finally {
+        saveAllBtn.disabled = false;
+        eventSelect.disabled = false;
+    }
+});
+
+loadEvents();
+</script>
+
+</body>
+</html>

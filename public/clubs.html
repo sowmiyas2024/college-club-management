@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>College Clubs | CampusConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f3ff;
+            font-family: Arial, sans-serif;
+        }
+        .brand { color: #6d28d9; font-weight: bold; }
+        .club-card {
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(50, 30, 90, .08);
+            height: 100%;
+        }
+        .category {
+            background: #ede9fe;
+            color: #5b21b6;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand brand" href="/">CampusConnect</a>
+            <a class="btn btn-outline-primary" href="/">Dashboard</a>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <h2 class="fw-bold">Explore College Clubs</h2>
+        <p class="text-secondary">Find your community and discover your interests.</p>
+
+        <div class="d-flex justify-content-between align-items-center my-4">
+            <h5 class="mb-0">Available Clubs</h5>
+            <button id="refreshBtn" class="btn btn-outline-primary btn-sm">
+                Refresh
+            </button>
+        </div>
+
+        <div id="message" class="mb-3" role="status" aria-live="polite"></div>
+        <div id="clubsList" class="row g-4"></div>
+    </main>
+
+    <script>
+        const clubsList = document.getElementById("clubsList");
+        const message = document.getElementById("message");
+
+        async function loadClubs() {
+            clubsList.replaceChildren();
+            message.className = "text-secondary";
+            message.textContent = "Loading clubs...";
+
+            try {
+                const response = await fetch("/api/clubs", {
+                    credentials: "same-origin"
+                });
+
+                if (response.status === 401) {
+                    window.location.replace("/login.html");
+                    return;
+                }
+
+                const clubs = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(clubs.message || "Could not load clubs.");
+                }
+
+                message.textContent = clubs.length
+                    ? `${clubs.length} club(s) available`
+                    : "No clubs have been added yet.";
+
+                clubs.forEach(club => {
+                    const column = document.createElement("div");
+                    column.className = "col-md-6 col-lg-4";
+
+                    const card = document.createElement("div");
+                    card.className = "card club-card p-4";
+
+                    const title = document.createElement("h5");
+                    title.className = "fw-bold";
+                    title.textContent = club.name;
+
+                    const category = document.createElement("span");
+                    category.className = "category align-self-start";
+                    category.textContent = club.category;
+
+                    const description = document.createElement("p");
+                    description.className = "text-secondary mt-3";
+                    description.textContent = club.description;
+
+                    const coordinator = document.createElement("p");
+                    coordinator.className = "mb-1";
+                    coordinator.textContent = "Coordinator: " +
+(
+    club.coordinatorUser
+        ? club.coordinatorUser.name
+        : club.coordinator || "Not assigned"
+);
+
+                    const meeting = document.createElement("p");
+                    meeting.className = "text-secondary small mb-0";
+                    meeting.textContent = "Meeting day: " + club.meetingDay;
+
+                    const joinBtn = document.createElement("button");
+joinBtn.className = "btn btn-primary mt-3";
+joinBtn.textContent = "Join Club";
+
+joinBtn.addEventListener("click", async () => {
+    joinBtn.disabled = true;
+    joinBtn.textContent = "Submitting...";
+
+    try {
+        const response = await fetch(
+            `/api/clubs/${club._id}/join`,
+            {
+                method: "POST",
+                credentials: "same-origin"
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Could not join club.");
+        }
+
+        joinBtn.textContent = "Request Sent";
+        alert(result.message);
+    } catch (error) {
+        joinBtn.disabled = false;
+        joinBtn.textContent = "Join Club";
+        alert(error.message);
+    }
+});
+
+card.append(title, category, description, coordinator, meeting, joinBtn);
+                    column.appendChild(card);
+                    clubsList.appendChild(column);
+                });
+            } catch (error) {
+                message.className = "alert alert-danger";
+                message.textContent = error.message;
+            }
+        }
+
+        document.getElementById("refreshBtn")
+            .addEventListener("click", loadClubs);
+
+        loadClubs();
+    </script>
+</body>
+</html>
